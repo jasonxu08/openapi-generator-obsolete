@@ -98,6 +98,9 @@
               },
               "default": "available"
             }
+          },
+          {
+            "$ref": "#/components/headers/X-Header-Test"
           }
         ],
         "responses": {
@@ -995,6 +998,15 @@
         "xml": {
           "name": "Order"
         }
+      }
+    },
+    "headers": {
+      "X-Header-Test": {
+        "description": "A header to test if headers work.",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
       }
     }
   }
