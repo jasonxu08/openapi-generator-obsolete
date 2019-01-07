@@ -28,6 +28,7 @@ import org.openapitools.codegen.CodegenParameter;
 import org.openapitools.codegen.CodegenResponse;
 import org.openapitools.codegen.CodegenType;
 import org.openapitools.codegen.languages.features.BeanValidationFeatures;
+import org.openapitools.codegen.languages.features.MultipartFeatures;
 import org.openapitools.codegen.utils.URLPathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ import java.util.Map;
 
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
-public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen implements BeanValidationFeatures {
+public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen implements BeanValidationFeatures, MultipartFeatures {
     public static final String SERVER_PORT = "serverPort";
     /**
      * Name of the sub-directory in "src/main/resource" where to find the
@@ -54,8 +55,10 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
     protected String title = "OpenAPI Server";
 
     protected boolean useBeanValidation = true;
+    protected boolean useMultipartFeature = false;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractJavaJAXRSServerCodegen.class);
+    private static final String NEED_MULTIPART_IMPORT = "needMultipartImport";
 
     public AbstractJavaJAXRSServerCodegen() {
         super();
@@ -149,7 +152,15 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
 
     @Override
     public Map<String, Object> postProcessOperationsWithModels(Map<String, Object> objs, List<Object> allModels) {
-        return jaxrsPostProcessOperations(objs);
+        Map<String, Object> result = jaxrsPostProcessOperations(objs);
+        
+        // if a operation requires multipart features, set useMultipartFeature to true to enable features in generated pom.xml
+        if (Boolean.TRUE.equals(result.get(NEED_MULTIPART_IMPORT))) {
+            setUseMultipartFeature(true);
+            writePropertyBack(USE_MULTIPART_FEATURE, useMultipartFeature);
+        }
+        
+        return result;
     }
 
     static Map<String, Object> jaxrsPostProcessOperations(Map<String, Object> objs) {
@@ -187,6 +198,13 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
                     if (isMultipartPost) {
                         parameter.vendorExtensions.put("x-multipart", "true");
                     }
+                }
+                
+                // put needMultipartImport on operation level to enable the multipart imports in the generated code
+                if (isMultipartPost
+                    || Boolean.TRUE.equals(operation.isMultipart)
+                    || operation.allParams.stream().anyMatch(cp -> cp.isFormParam)) {
+                    objs.put(NEED_MULTIPART_IMPORT, true);
                 }
 
                 List<CodegenResponse> responses = operation.responses;
@@ -282,5 +300,8 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
         this.useBeanValidation = useBeanValidation;
     }
 
+    public void setUseMultipartFeature(boolean useMultipartFeature) {
+        this.useMultipartFeature = useMultipartFeature;
+    }
 
 }
