@@ -17,18 +17,103 @@
 
 package org.openapitools.codegen.python;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
 import org.openapitools.codegen.*;
+import org.openapitools.codegen.config.CodegenConfigurator;
 import org.openapitools.codegen.languages.PythonClientCodegen;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("static-method")
 public class PythonTest {
+    @Test(description = "Request body parameters")
+    public void modelRequestBodyParametersTest() throws IOException {
+        // Setup inputs and outputs
+        File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+        File template = Files.createTempDirectory("test").toFile();
+        template.deleteOnExit();
+
+        String outDir = Paths.get(output.toURI()).toAbsolutePath().toString();
+        String templateDir = Paths.get(template.toURI()).toAbsolutePath().toString();
+
+        // Create template which contains only bodyParam
+        String templateContent = "{{#operations}}\n"
+                + "{{#operation}}\n"
+                + "{{#bodyParam}}\n" 
+                + "{{{example}}}\n" 
+                + "{{/bodyParam}}\n"
+                + "{{/operation}}\n"
+                + "{{/operations}}";
+        
+        OutputStream templateWriter = new FileOutputStream(Paths.get(templateDir, "controller_test.mustache").toFile());
+        OutputStreamWriter templateStreamWriter = new OutputStreamWriter(templateWriter, "UTF-8");
+        templateStreamWriter.write(templateContent);
+        templateStreamWriter.close();
+        
+        
+        final CodegenConfigurator configurator = new CodegenConfigurator().setGeneratorName("python-flask")
+                .setInputSpec("src/test/resources/3_0/post-request-body-array-value.yaml")
+                .setOutputDir(outDir)
+                .setTemplateDir(templateDir);
+
+        final ClientOptInput clientOptInput = configurator.toClientOptInput();
+        DefaultGenerator generator = new DefaultGenerator();
+        generator.setGenerateMetadata(false);
+
+        // Generate file
+        List<File> generatedFiles = generator.opts(clientOptInput).generate();
+
+        // Read generated data
+        String defaultControllerPath = Paths.get("openapi_server","test","test_default_controller.py").toString();
+        TestUtils.ensureContainsFile(generatedFiles, output, defaultControllerPath );
+
+        InputStream is = new FileInputStream(
+                Paths.get(outDir, defaultControllerPath).toString());
+
+        BufferedReader buf = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+
+        String line = buf.readLine();
+        StringBuilder sb = new StringBuilder();
+
+        while(line != null){
+           sb.append(line);
+           line = buf.readLine();
+        }
+
+        String resultString = sb.toString();
+        buf.close();
+        is.close();
+
+        // Compare generated to expected
+        ObjectMapper jsonMapper = ObjectMapperFactory.createJson();
+        JsonNode expected = jsonMapper.readTree("[{\"text\":\"some text\", \"id\":19},{\"id\":63, \"text\":\"some text\"}]");
+        JsonNode actual = jsonMapper.readTree(resultString);
+        System.out.print(resultString);
+        Assert.assertEquals(actual, expected);
+    }
+
 
     @Test(description = "convert a python model with dots")
     public void modelTest() {
