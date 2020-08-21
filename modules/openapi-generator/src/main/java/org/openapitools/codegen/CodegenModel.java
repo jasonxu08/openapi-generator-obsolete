@@ -80,6 +80,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
 
     public Set<String> imports = new TreeSet<String>();
     public boolean hasVars, emptyVars, hasMoreModels, hasEnums, isEnum;
+    public CodegenProperty parentContainer;
     /**
      * Indicates the OAS schema specifies "nullable: true".
      */

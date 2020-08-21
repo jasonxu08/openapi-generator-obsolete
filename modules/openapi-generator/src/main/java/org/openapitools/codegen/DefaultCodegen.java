@@ -2982,6 +2982,10 @@ public class DefaultCodegen implements CodegenConfig {
      * @return Codegen Property object
      */
     public CodegenProperty fromProperty(String name, Schema p) {
+        return fromProperty(name, p, null);
+    }
+
+    private CodegenProperty fromProperty(String name, Schema p, Integer itemsDepth) {
         if (p == null) {
             LOGGER.error("Undefined property/schema for `{}`. Default to type:string.", name);
             return null;
@@ -2995,6 +2999,7 @@ public class DefaultCodegen implements CodegenConfig {
 
         ModelUtils.syncValidationProperties(p, property);
 
+        property.itemsDepth = itemsDepth;
         property.name = toVarName(name);
         property.baseName = name;
         if (p.getType() == null) {
@@ -3250,7 +3255,11 @@ public class DefaultCodegen implements CodegenConfig {
             }
             ArraySchema arraySchema = (ArraySchema) p;
             Schema innerSchema = ModelUtils.unaliasSchema(this.openAPI, getSchemaItems(arraySchema), importMapping);
-            CodegenProperty cp = fromProperty(itemName, innerSchema);
+            if (arraySchema.getItems() == null) {
+                arraySchema.setItems(innerSchema);
+            }
+            CodegenProperty cp = fromProperty(itemName, innerSchema,
+                    itemsDepth == null ? 1 : itemsDepth.intValue() + 1);
             updatePropertyForArray(property, cp);
         } else if (ModelUtils.isMapSchema(p)) {
             property.isContainer = true;
@@ -3268,7 +3277,8 @@ public class DefaultCodegen implements CodegenConfig {
                 innerSchema = new StringSchema().description("//TODO automatically added by openapi-generator due to undefined type");
                 p.setAdditionalProperties(innerSchema);
             }
-            CodegenProperty cp = fromProperty("inner", innerSchema);
+            CodegenProperty cp = fromProperty("inner", innerSchema,
+                    itemsDepth == null ? 1 : itemsDepth.intValue() + 1);
             updatePropertyForMap(property, cp);
         } else if (isFreeFormObject(p)) {
             property.isFreeFormObject = true;
@@ -4636,10 +4646,10 @@ public class DefaultCodegen implements CodegenConfig {
      * @param schema the input OAS schema.
      */
     protected void addParentContainer(CodegenModel model, String name, Schema schema) {
-        final CodegenProperty property = fromProperty(name, schema);
-        addImport(model, property.complexType);
+        model.parentContainer = fromProperty(name, schema);
+        addImport(model, model.parentContainer.complexType);
         model.parent = toInstantiationType(schema);
-        final String containerType = property.containerType;
+        final String containerType = model.parentContainer.containerType;
         final String instantiationType = instantiationTypes.get(containerType);
         if (instantiationType != null) {
             addImport(model, instantiationType);
