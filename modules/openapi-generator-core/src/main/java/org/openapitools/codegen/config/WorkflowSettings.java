@@ -46,6 +46,7 @@ public class WorkflowSettings {
     public static final boolean DEFAULT_ENABLE_MINIMAL_UPDATE = false;
     public static final boolean DEFAULT_STRICT_SPEC_BEHAVIOR = true;
     public static final boolean DEFAULT_GENERATE_ALIAS_AS_MODEL = false;
+    public static final boolean DEFAULT_ALLOW_INLINE_SCHEMAS = false;
     public static final String DEFAULT_TEMPLATING_ENGINE_NAME = "mustache";
     public static final Map<String, String> DEFAULT_GLOBAL_PROPERTIES = Collections.unmodifiableMap(new HashMap<>());
 
@@ -61,6 +62,7 @@ public class WorkflowSettings {
     private boolean enableMinimalUpdate = DEFAULT_ENABLE_MINIMAL_UPDATE;
     private boolean strictSpecBehavior = DEFAULT_STRICT_SPEC_BEHAVIOR;
     private boolean generateAliasAsModel = DEFAULT_GENERATE_ALIAS_AS_MODEL;
+    private boolean allowInlineSchemas = DEFAULT_ALLOW_INLINE_SCHEMAS;
     private String templateDir;
     private String templatingEngineName = DEFAULT_TEMPLATING_ENGINE_NAME;
     private String ignoreFileOverride;
@@ -82,6 +84,7 @@ public class WorkflowSettings {
         this.ignoreFileOverride = builder.ignoreFileOverride;
         this.globalProperties = Collections.unmodifiableMap(builder.globalProperties);
         this.generateAliasAsModel = builder.generateAliasAsModel;
+        this.allowInlineSchemas = builder.allowInlineSchemas;
     }
 
     /**
@@ -112,6 +115,7 @@ public class WorkflowSettings {
         builder.strictSpecBehavior = copy.isStrictSpecBehavior();
         builder.templatingEngineName = copy.getTemplatingEngineName();
         builder.ignoreFileOverride = copy.getIgnoreFileOverride();
+        builder.allowInlineSchemas = copy.isAllowInlineSchemas();
 
         // this, and any other collections, must be mutable in the builder.
         builder.globalProperties = new HashMap<>(copy.getGlobalProperties());
@@ -245,6 +249,10 @@ public class WorkflowSettings {
         return strictSpecBehavior;
     }
 
+    public boolean isAllowInlineSchemas() {
+        return allowInlineSchemas;
+    }
+
     /**
      * Gets the directory holding templates used in generation. This option allows users to extend or modify built-in templates, or to write their own.
      *
@@ -311,6 +319,7 @@ public class WorkflowSettings {
         private String templateDir;
         private String templatingEngineName = DEFAULT_TEMPLATING_ENGINE_NAME;
         private String ignoreFileOverride;
+        private boolean allowInlineSchemas = DEFAULT_ALLOW_INLINE_SCHEMAS;
 
         // NOTE: All collections must be mutable in the builder, and copied to a new immutable collection in .build()
         private Map<String, String> globalProperties = new HashMap<>();
@@ -554,6 +563,11 @@ public class WorkflowSettings {
             return this;
         }
 
+        public Builder withAllowInlineSchemas(Boolean allowInlineSchemas) {
+            this.allowInlineSchemas = allowInlineSchemas != null ? allowInlineSchemas : Boolean.valueOf(DEFAULT_ALLOW_INLINE_SCHEMAS);
+            return this;
+        }
+
         /**
          * Returns a {@code WorkflowSettings} built from the parameters previously set.
          *
@@ -586,6 +600,7 @@ public class WorkflowSettings {
                 ", ignoreFileOverride='" + ignoreFileOverride + '\'' +
                 ", globalProperties=" + globalProperties +
                 ", generateAliasAsModel=" + generateAliasAsModel +
+                ", allowInlineSchemas=" + allowInlineSchemas +
                 '}';
     }
 

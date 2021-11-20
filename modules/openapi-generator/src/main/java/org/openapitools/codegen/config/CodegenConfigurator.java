@@ -477,6 +477,11 @@ public class CodegenConfigurator {
         return this;
     }
 
+    public CodegenConfigurator setAllowInlineSchemas(boolean allowInlineSchemas) {
+        workflowSettingsBuilder.withAllowInlineSchemas(allowInlineSchemas);
+        return this;
+    }
+
     @SuppressWarnings("WeakerAccess")
     public Context<?> toContext() {
         Validate.notEmpty(generatorName, "generator name must be specified");
@@ -590,6 +595,7 @@ public class CodegenConfigurator {
         config.setEnablePostProcessFile(workflowSettings.isEnablePostProcessFile());
         config.setEnableMinimalUpdate(workflowSettings.isEnableMinimalUpdate());
         config.setStrictSpecBehavior(workflowSettings.isStrictSpecBehavior());
+        config.setAllowInlineSchemas(workflowSettings.isAllowInlineSchemas());
 
         TemplatingEngineAdapter templatingEngine = TemplatingEngineLoader.byIdentifier(workflowSettings.getTemplatingEngineName());
         config.setTemplatingEngine(templatingEngine);
