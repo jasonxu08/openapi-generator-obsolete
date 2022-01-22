@@ -26,6 +26,17 @@ paths:
         '200':
           description: Updated
 
+  /sizes:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sizes'
+      responses:
+        '200':
+          description: Created
+
   /pets-filtered:
     patch:
       requestBody:
@@ -64,6 +75,44 @@ components:
       type: object
       required:
         - pet_type
+    Breed:
+      type: string
+      example: Retriever
+      enum: [Dingo, Husky, Retriever, Shepherd]
+    Sizes:
+      type: object
+      required:
+        - data
+        - parent_breeds
+        - possible_breeds
+      properties:
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+              description: tuple with timestamp and value
+              format: double
+              nullable: true
+            minItems: 2
+            maxItems: 2
+            description: Array of pet sizes over time.
+            example: [1575317847.0, 12.3]
+        parent_breeds:
+          type: array
+          example: [["Dingo", "Dingo"], ["Husky", "Shepherd"]]
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Breed'
+            minItems: 2
+            maxItems: 2
+            description: Parent breeds.
+        possible_breeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/Breed'
     Dog:
       allOf:
         # This field will not match to any type.

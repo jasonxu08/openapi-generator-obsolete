@@ -1,3 +1,4 @@
+export * from './Breed';
 export * from './Cat';
 export * from './CatAllOf';
 export * from './Dog';
@@ -5,7 +6,9 @@ export * from './DogAllOf';
 export * from './InlineObject';
 export * from './PetByAge';
 export * from './PetByType';
+export * from './Sizes';
 
+import { Breed } from './Breed';
 import { Cat } from './Cat';
 import { CatAllOf } from './CatAllOf';
 import { Dog , DogBreedEnum   } from './Dog';
@@ -13,6 +16,7 @@ import { DogAllOf , DogAllOfBreedEnum   } from './DogAllOf';
 import { InlineObject } from './InlineObject';
 import { PetByAge } from './PetByAge';
 import { PetByType, PetByTypePetTypeEnum    } from './PetByType';
+import { Sizes } from './Sizes';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -34,6 +38,7 @@ const supportedMediaTypes: { [mediaType: string]: number } = {
 
 
 let enumsMap: Set<string> = new Set<string>([
+    "Breed",
     "DogBreedEnum",
     "DogAllOfBreedEnum",
     "PetByTypePetTypeEnum",
@@ -47,6 +52,7 @@ let typeMap: {[index: string]: any} = {
     "InlineObject": InlineObject,
     "PetByAge": PetByAge,
     "PetByType": PetByType,
+    "Sizes": Sizes,
 }
 
 export class ObjectSerializer {

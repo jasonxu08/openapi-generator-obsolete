@@ -24,6 +24,19 @@ import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } fr
 /**
  * 
  * @export
+ * @enum {string}
+ */
+
+export enum Breed {
+    Dingo = 'Dingo',
+    Husky = 'Husky',
+    Retriever = 'Retriever',
+    Shepherd = 'Shepherd'
+}
+
+/**
+ * 
+ * @export
  * @interface Cat
  */
 export interface Cat {
@@ -182,6 +195,31 @@ export enum PetByTypePetTypeEnum {
     Dog = 'Dog'
 }
 
+/**
+ * 
+ * @export
+ * @interface Sizes
+ */
+export interface Sizes {
+    /**
+     * 
+     * @type {Array<Array<number>>}
+     * @memberof Sizes
+     */
+    data: Array<Array<number>>;
+    /**
+     * 
+     * @type {Array<Array<Breed>>}
+     * @memberof Sizes
+     */
+    parent_breeds: Array<Array<Breed>>;
+    /**
+     * 
+     * @type {Array<Breed>}
+     * @memberof Sizes
+     */
+    possible_breeds: Array<Breed>;
+}
 
 /**
  * DefaultApi - axios parameter creator
@@ -288,6 +326,39 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @param {Sizes} [sizes] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        sizesPut: async (sizes?: Sizes, options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/sizes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(sizes, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -328,6 +399,16 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.petsPatch(catDog, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @param {Sizes} [sizes] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async sizesPut(sizes?: Sizes, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.sizesPut(sizes, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -364,6 +445,15 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         petsPatch(catDog?: Cat | Dog, options?: any): AxiosPromise<void> {
             return localVarFp.petsPatch(catDog, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {Sizes} [sizes] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        sizesPut(sizes?: Sizes, options?: any): AxiosPromise<void> {
+            return localVarFp.sizesPut(sizes, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -406,6 +496,17 @@ export class DefaultApi extends BaseAPI {
      */
     public petsPatch(catDog?: Cat | Dog, options?: AxiosRequestConfig) {
         return DefaultApiFp(this.configuration).petsPatch(catDog, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {Sizes} [sizes] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public sizesPut(sizes?: Sizes, options?: any) {
+        return DefaultApiFp(this.configuration).sizesPut(sizes, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
