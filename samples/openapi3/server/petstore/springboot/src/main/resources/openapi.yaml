@@ -688,9 +688,11 @@ components:
           type: integer
         quantity:
           format: int32
+          nullable: true
           type: integer
         shipDate:
           format: date-time
+          nullable: true
           type: string
         status:
           description: Order Status
@@ -710,14 +712,17 @@ components:
       description: A category for a pet
       example:
         name: name
-        id: 6
+        id: 1
       properties:
         id:
           format: int64
+          minimum: 1
           type: integer
         name:
           pattern: "^[a-zA-Z0-9]+[a-zA-Z0-9\\.\\-_]*[a-zA-Z0-9]+$"
           type: string
+      required:
+      - id
       title: Pet category
       type: object
       xml:
@@ -744,6 +749,7 @@ components:
         lastName:
           type: string
         email:
+          nullable: true
           type: string
         password:
           type: string
@@ -782,7 +788,7 @@ components:
         id: 0
         category:
           name: name
-          id: 6
+          id: 1
         tags:
         - name: name
           id: 1
