@@ -559,9 +559,15 @@ class ApiClient {
     * @param {String} str The date value as a string.
     * @returns {Date} The parsed date object.
     */{{/emitJSDoc}}
+
+    {{#emitJSDoc}}/**
+    * If the date string contains a space between date and time
+    * replace it with a 'T' separator 
+    * fix_issue 9523 
+    */{{/emitJSDoc}}
     static parseDate(str) {
         if (isNaN(str)) {
-            return new Date(str.replace(/(\d)(T)(\d)/i, '$1 $3'));
+            return new Date(str.replace(/ /g,"T"));
         }
         return new Date(+str);
     }
