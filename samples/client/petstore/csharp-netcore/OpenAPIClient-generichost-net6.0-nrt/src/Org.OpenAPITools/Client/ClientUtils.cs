@@ -10,6 +10,7 @@
 #nullable enable
 
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -126,7 +127,14 @@ namespace Org.OpenAPITools.Client
             if (obj is bool boolean)
                 return boolean ? "true" : "false";
             if (obj is System.Collections.ICollection collection)
-                return string.Join(",", collection.Cast<object>());
+            {
+                var stringCollection = new ArrayList();
+                foreach (var item in collection)
+                {
+                    stringCollection.Add(Convert.ToString(item, System.Globalization.CultureInfo.InvariantCulture));
+                }
+                return string.Join(",", stringCollection.ToArray());
+            }
 
             return Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture);
         }

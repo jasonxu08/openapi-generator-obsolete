@@ -116,7 +116,14 @@ namespace Org.OpenAPITools.Client
             if (obj is bool boolean)
                 return boolean ? "true" : "false";
             if (obj is ICollection collection)
-                return string.Join(",", collection.Cast<object>());
+            {
+                var stringCollection = new ArrayList();
+                foreach (var item in collection)
+                {
+                    stringCollection.Add(Convert.ToString(item, CultureInfo.InvariantCulture));
+                }
+                return string.Join(",", stringCollection.ToArray());
+            }
             if (obj is Enum && HasEnumMemberAttrValue(obj))
                 return GetEnumMemberAttrValue(obj);
 
