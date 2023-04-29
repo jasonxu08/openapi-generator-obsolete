@@ -19,17 +19,24 @@ package org.openapitools.codegen.languages;
 import com.github.curiousoddman.rgxgen.RgxGen;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.DateSchema;
+import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,9 +148,22 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
                     return "True";
             }
         } else if (ModelUtils.isDateSchema(p)) {
-            // TODO
+            if (p.getDefault() == null) return null;
+            DateSchema schema = (DateSchema)p;
+            SimpleDateFormat format = new SimpleDateFormat("y, M, d", Locale.ROOT);
+            String args = format.format(schema.getDefault());
+            return String.format("_dt.date(%s)", args);
         } else if (ModelUtils.isDateTimeSchema(p)) {
-            // TODO
+            if (p.getDefault() == null) return null;
+            DateTimeSchema schema = (DateTimeSchema)p;
+            OffsetDateTime dateTime = schema.getDefault();
+            return String.format(  // SEE: https://docs.python.org/3/library/datetime.html#datetime.datetime
+                    "_dt.datetime(%d, %d, %d, %d, %d, %d, %d, _dt.timezone(_dt.timedelta(seconds=%d)))",
+                    dateTime.getYear(), dateTime.getMonth().getValue(), dateTime.getDayOfMonth(),
+                    dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond(),
+                    dateTime.getNano() / 1_000, // microseconds
+                    dateTime.getOffset().getTotalSeconds()
+                );
         } else if (ModelUtils.isNumberSchema(p)) {
             if (p.getDefault() != null) {
                 return p.getDefault().toString();
@@ -621,6 +641,29 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
         return type;
     }
 
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        objs = super.postProcessModels(objs);
+        for (ModelMap mo : objs.getModels()) {
+            postProcessModel(objs, mo.getModel());
+        }
+        return objs;
+    }
+
+    protected void postProcessModel(ModelsMap baseModel, IJsonSchemaValidationPropertiesWithDefaultValue model) {
+        if ((model.getIsDateTime() || model.getIsDate()) && model.getDefaultValue() != null) {
+            final String importLine = "import datetime as _dt";
+            if (baseModel.getImports().stream().map(imp -> imp.get("import")).anyMatch(importLine::equals))
+                return;
+            Map<String, String> dtImport = new HashMap<>();
+            dtImport.put("import", importLine);
+            List<Map<String, String>> imports = baseModel.getImports();
+            imports.add(dtImport);
+            imports.sort(Comparator.comparing(imp -> imp.get("import")));
+        }
+        model.getVars().forEach(var -> postProcessModel(baseModel, var));
+    }
+
 
     @Override
     public String toModelName(String name) {
@@ -638,7 +681,7 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
 
         String sanitizedName = sanitizeName(name); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.
         // remove dollar sign
-        sanitizedName = sanitizedName.replaceAll("$", "");
+        sanitizedName = sanitizedName.replace("$", "");
         // remove whitespace
         sanitizedName = sanitizedName.replaceAll("\\s+", "");
 
