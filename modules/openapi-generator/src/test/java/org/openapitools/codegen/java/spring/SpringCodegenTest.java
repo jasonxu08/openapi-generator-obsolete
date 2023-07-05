@@ -2898,7 +2898,37 @@ public class SpringCodegenTest {
                 .bodyContainsLines("if (b.value.equals(value)) {");
     }
 
+    @Test
+    public void shouldNotFallWithNPEOrStackOverflow() throws IOException {
+        File output = Files.createTempDirectory("test").toFile().getCanonicalFile();
+        output.deleteOnExit();
 
+        OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/issue_spring_codegen_polymorphism.yaml", null, new ParseOptions()).getOpenAPI();
+
+        SpringCodegen codegen = new SpringCodegen();
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(SpringCodegen.DATE_LIBRARY, "java8-localdatetime");
+        codegen.additionalProperties().put(INTERFACE_ONLY, "true");
+        codegen.additionalProperties().put(USE_ONE_OF_INTERFACES, "false");
+        codegen.additionalProperties().put(CodegenConstants.SERIALIZABLE_MODEL, "true");
+        codegen.additionalProperties().put(CodegenConstants.HIDE_GENERATION_TIMESTAMP, "true");
+        codegen.additionalProperties().put(USE_TAGS, "true");
+
+        ClientOptInput input = new ClientOptInput();
+        input.openAPI(openAPI);
+        input.config(codegen);
+
+        DefaultGenerator generator = new DefaultGenerator();
+        generator.setGeneratorPropertyDefault(CodegenConstants.LIBRARY, "spring-cloud");
+        generator.setGeneratorPropertyDefault(CodegenConstants.MODEL_TESTS, "false");
+        generator.setGeneratorPropertyDefault(CodegenConstants.MODEL_DOCS, "false");
+        generator.setGeneratorPropertyDefault(CodegenConstants.APIS, "true");
+        generator.setGeneratorPropertyDefault(CodegenConstants.MODELS, "true");
+        generator.setGeneratorPropertyDefault(CodegenConstants.SUPPORTING_FILES, "false");
+
+        generator.opts(input).generate();
+    }
 
     @Test
     public void multiLineOperationDescription() throws IOException {
@@ -2924,4 +2954,5 @@ public class SpringCodegenTest {
         JavaFileAssert.assertThat(files.get("PingTagApi.java"))
                 .fileContains("This is a multine tag : * tag item 1 * tag item 2 ");
     }
+  
 }
