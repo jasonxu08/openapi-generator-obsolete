@@ -36,6 +36,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
     // codegen returns the first one in the list, i.e. there is no obvious parent in the OpenAPI specification.
     // When possible, the mustache templates should use 'allParents' to handle multiple parents.
     public String parent, parentSchema;
+    public Boolean parentCtorCallNeeded = false;
     public List<String> interfaces;
     // The list of parent model name from the schemas. In order of preference, the parent is obtained
     // from the 'allOf' attribute, then 'anyOf', and finally 'oneOf'.

@@ -5709,6 +5709,39 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     /**
+     * Determines if a constructor call is needed for the parent type of a model `()` 
+     * in the generated code.
+     * 
+     * Important note: This is kotlin specific at the moment, but could be 
+     * extended with to support detection for other languages as well.
+     * 
+     * The generator used to default to issuing a supertype 
+     * constructor call and then it was changed to default to not doing it. 
+     * Both are wrong since there are different cases and the decision has to be
+     * made at runtime based on the parent type itself. 
+     * 
+     * For example if it is a HashMap (because you set 
+     * additionalProperties: true for example) then it MUST HAVE a parent
+     * constructor call. If the parent type is an interface because you are
+     * using allOf with a discriminator property then the generated code for the
+     * model will have it's parent type as the interface which MUST NOT HAVE a
+     * parent constructor call.
+     *  
+     * @see https://github.com/OpenAPITools/openapi-generator/issues/8366
+     * 
+     * @return {boolean} `true` if the () call syntax is needed, false otherwise.
+     */
+    protected boolean isParentCtorCallNeeded(CodegenModel model, String name, Schema schema) {
+        final CodegenProperty property = fromProperty(name, schema, false);
+        // TODO: Right now this is specific to the Kotlin language but it is 
+        // possible or even likely that other languages need the same or similar logic.
+        if (property.baseType == "kotlin.collections.Map") {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Sets the value of the 'model.parent' property in CodegenModel, based on the value
      * of the 'additionalProperties' keyword. Some language generator use class inheritance
      * to implement additional properties. For example, in Java the generated model class
@@ -5728,6 +5761,7 @@ public class DefaultCodegen implements CodegenConfig {
         final CodegenProperty property = fromProperty(name, schema, false);
         addImport(model, property.complexType);
         model.parent = toInstantiationType(schema);
+        model.parentCtorCallNeeded = this.isParentCtorCallNeeded(model, name, schema);
         final String instantiationType = instantiationTypes.get(property.containerType);
         if (instantiationType != null) {
             addImport(model, instantiationType);
