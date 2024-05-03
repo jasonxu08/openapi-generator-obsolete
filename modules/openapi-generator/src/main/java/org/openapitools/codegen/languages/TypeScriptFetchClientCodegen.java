@@ -52,6 +52,8 @@ public class TypeScriptFetchClientCodegen extends AbstractTypeScriptClientCodege
 
     protected String npmRepository = null;
     protected String importFileExtension = "";
+    protected String apiDocPath = "docs/";
+    protected String modelDocPath = "docs/";
     private boolean useSingleRequestParameter = true;
     private boolean prefixParameterInterfaces = false;
     protected boolean addedApiIndex = false;
@@ -94,6 +96,9 @@ public class TypeScriptFetchClientCodegen extends AbstractTypeScriptClientCodege
 
         this.apiTemplateFiles.put("apis.mustache", ".ts");
 
+        this.apiDocTemplateFiles.put("api_doc.mustache", ".md");
+        this.modelDocTemplateFiles.put("model_doc.mustache", ".md");
+
         this.addExtraReservedWords();
 
         supportModelPropertyNaming(CodegenConstants.MODEL_PROPERTY_NAMING_TYPE.camelCase);
@@ -115,6 +120,16 @@ public class TypeScriptFetchClientCodegen extends AbstractTypeScriptClientCodege
     @Override
     public String getHelp() {
         return "Generates a TypeScript client library using Fetch API (beta).";
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+        return (outputFolder.replace('/', File.separatorChar) + apiDocPath);
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+        return (outputFolder.replace('/', File.separatorChar) + modelDocPath);
     }
 
     public String getNpmRepository() {
@@ -219,6 +234,10 @@ public class TypeScriptFetchClientCodegen extends AbstractTypeScriptClientCodege
 
         this.apiPackage = sourceDir + "apis";
         this.modelPackage = sourceDir + "models";
+
+        // make api and model doc path available in mustache template
+        additionalProperties.put("apiDocPath", apiDocPath);
+        additionalProperties.put("modelDocPath", modelDocPath);
 
         supportingFiles.add(new SupportingFile("index.mustache", sourceDir, "index.ts"));
         supportingFiles.add(new SupportingFile("runtime.mustache", sourceDir, "runtime.ts"));
