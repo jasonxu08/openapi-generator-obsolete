@@ -32,7 +32,6 @@ class Pet {
 
      this.status,
   });
-
   @JsonKey(
     
     name: r'id',
@@ -160,5 +159,4 @@ final String value;
 @override
 String toString() => value;
 }
-
 

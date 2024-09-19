@@ -26,7 +26,6 @@ class MapTest {
 
      this.indirectMap,
   });
-
   @JsonKey(
     
     name: r'map_map_of_string',
@@ -119,5 +118,4 @@ final String value;
 @override
 String toString() => value;
 }
-
 

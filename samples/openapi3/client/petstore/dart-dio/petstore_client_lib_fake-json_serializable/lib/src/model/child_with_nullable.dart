@@ -27,7 +27,6 @@ class ChildWithNullable {
 
      this.otherProperty,
   });
-
   @JsonKey(
     
     name: r'type',
@@ -104,5 +103,4 @@ final String value;
 @override
 String toString() => value;
 }
-
 

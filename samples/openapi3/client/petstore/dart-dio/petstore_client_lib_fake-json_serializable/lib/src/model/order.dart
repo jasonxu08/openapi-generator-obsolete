@@ -30,7 +30,6 @@ class Order {
 
      this.complete = false,
   });
-
   @JsonKey(
     
     name: r'id',
@@ -158,5 +157,4 @@ final String value;
 @override
 String toString() => value;
 }
-
 

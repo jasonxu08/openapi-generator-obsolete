@@ -22,7 +22,6 @@ class ParentWithNullable {
 
      this.nullableProperty,
   });
-
   @JsonKey(
     
     name: r'type',
@@ -85,5 +84,4 @@ final String value;
 @override
 String toString() => value;
 }
-
 

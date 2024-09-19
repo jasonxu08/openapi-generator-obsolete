@@ -22,7 +22,6 @@ class EnumArrays {
 
      this.arrayEnum,
   });
-
   @JsonKey(
     
     name: r'just_symbol',
@@ -90,7 +89,6 @@ String toString() => value;
 }
 
 
-
 enum EnumArraysArrayEnumEnum {
 @JsonValue(r'fish')
 fish(r'fish'),
@@ -106,5 +104,4 @@ final String value;
 @override
 String toString() => value;
 }
-
 
