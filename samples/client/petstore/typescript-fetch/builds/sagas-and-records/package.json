@@ -7,13 +7,7 @@
     "type": "git",
     "url": "https://github.com/GIT_USER_ID/GIT_REPO_ID.git"
   },
-  "main": "./dist/index.js",
-  "typings": "./dist/index.d.ts",
-  "module": "./dist/esm/index.js",
-  "sideEffects": false,
-  "scripts": {
-    "build": "tsc && tsc -p tsconfig.esm.json"
-  },
+  "main": "./index.ts",
   "devDependencies": {
     "immutable": "^4.0.0-rc.12",
     "normalizr": "^3.6.1",
