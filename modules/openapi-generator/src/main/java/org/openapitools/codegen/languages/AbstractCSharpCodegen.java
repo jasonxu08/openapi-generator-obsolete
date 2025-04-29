@@ -380,7 +380,7 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
         }
 
         if (additionalProperties.containsKey(CodegenConstants.USE_IENUMERABLE)) {
-        	setUseIEnumerable(convertPropertyToBooleanAndWriteBack(CodegenConstants.USE_IENUMERABLE));
+            setUseIEnumerable(convertPropertyToBooleanAndWriteBack(CodegenConstants.USE_IENUMERABLE));
         } else {
             additionalProperties.put(CodegenConstants.USE_IENUMERABLE, useIEnumerable);
         }
