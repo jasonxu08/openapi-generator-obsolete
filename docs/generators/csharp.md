@@ -49,6 +49,7 @@ These options may be applied as additional-properties (cli) or configOptions (pl
 |sourceFolder|source folder for generated code| |src|
 |targetFramework|The target .NET framework version. To target multiple frameworks, use `;` as the separator, e.g. `netstandard2.1;netcoreapp3.1`|<dl><dt>**netstandard1.3**</dt><dd>.NET Standard 1.3</dd><dt>**netstandard1.4**</dt><dd>.NET Standard 1.4</dd><dt>**netstandard1.5**</dt><dd>.NET Standard 1.5</dd><dt>**netstandard1.6**</dt><dd>.NET Standard 1.6</dd><dt>**netstandard2.0**</dt><dd>.NET Standard 2.0</dd><dt>**netstandard2.1**</dt><dd>.NET Standard 2.1</dd><dt>**net47**</dt><dd>.NET Framework 4.7</dd><dt>**net48**</dt><dd>.NET Framework 4.8</dd><dt>**net8.0**</dt><dd>.NET 8.0 (End of Support 10 November 2026)</dd><dt>**net9.0**</dt><dd>.NET 9.0 (End of Support 12 May 2026)</dd></dl>|net9.0|
 |useCollection|Deserialize array types to Collection&lt;T&gt; instead of List&lt;T&gt;.| |false|
+|useIEnumerable|Deserialize array types to IEnumerable&lt;T&gt; instead of List&lt;T&gt;.| |false|
 |useDateTimeForDate|Use DateTime to model date properties even if DateOnly supported. (.net 6.0+ only)| |false|
 |useDateTimeOffset|Use DateTimeOffset to model date-time properties| |false|
 |useIntForTimeout|Use int for Timeout (fall back to v7.9.0 templates). This option (for restsharp only) will be deprecated so please migrated to TimeSpan instead.| |false|
