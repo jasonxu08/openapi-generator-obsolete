@@ -21,6 +21,10 @@ import com.google.common.collect.ImmutableMap;
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Mustache.Lambda;
 import com.samskivert.mustache.Template;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -60,6 +64,7 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
     protected boolean useDateTimeOffsetFlag = false;
     protected boolean useDateTimeForDateFlag = false;
     protected boolean useCollection = false;
+    protected boolean useIEnumerable = false;
     @Setter protected boolean returnICollection = false;
     @Setter protected boolean netCoreProjectFileFlag = false;
     protected boolean nullReferenceTypesFlag = false;
@@ -187,6 +192,7 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
                         "byte[]",
                         "ICollection",
                         "Collection",
+                        "IEnumerable",
                         "List",
                         "Dictionary",
                         "DateTime?",
@@ -220,7 +226,14 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
         }
         this.setTypeMapping();
     }
-
+    public void setUseIEnumerable(boolean useIEnumerable) {
+        this.useIEnumerable = useIEnumerable;
+        if (useIEnumerable) {
+            instantiationTypes.put("array", "IEnumerable");
+            instantiationTypes.put("list", "IEnumerable");
+        }
+        this.setTypeMapping();
+    }
     public void useDateTimeOffset(boolean flag) {
         this.useDateTimeOffsetFlag = flag;
         this.setTypeMapping();
@@ -364,6 +377,12 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
             setUseCollection(convertPropertyToBooleanAndWriteBack(CodegenConstants.USE_COLLECTION));
         } else {
             additionalProperties.put(CodegenConstants.USE_COLLECTION, useCollection);
+        }
+
+        if (additionalProperties.containsKey(CodegenConstants.USE_IENUMERABLE)) {
+        	setUseIEnumerable(convertPropertyToBooleanAndWriteBack(CodegenConstants.USE_IENUMERABLE));
+        } else {
+            additionalProperties.put(CodegenConstants.USE_IENUMERABLE, useIEnumerable);
         }
 
         if (additionalProperties.containsKey(CodegenConstants.RETURN_ICOLLECTION)) {
@@ -755,7 +774,7 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
 
         property.name = patchPropertyName(model, property.name);
 
-        String[] nestedTypes = {"List", "Collection", "ICollection", "Dictionary"};
+        String[] nestedTypes = { "List", "Collection", "ICollection", "Dictionary", "IEnumerable" };
 
         Arrays.stream(nestedTypes).forEach(nestedType -> {
             // fix incorrect data types for maps of maps
@@ -1262,7 +1281,7 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
     }
 
     protected void processOperation(CodegenOperation operation) {
-        String[] nestedTypes = {"List", "Collection", "ICollection", "Dictionary"};
+        String[] nestedTypes = { "List", "Collection", "ICollection", "Dictionary", "IEnumerable" };
 
         Arrays.stream(nestedTypes).forEach(nestedType -> {
             if (operation.returnProperty != null && operation.returnType.contains("<" + nestedType + ">") && operation.returnProperty.items != null) {
@@ -2051,6 +2070,10 @@ public abstract class AbstractCSharpCodegen extends DefaultCodegen {
         if (this.useCollection) {
             typeMapping.put("array", "Collection");
             typeMapping.put("list", "Collection");
+        }
+        if (this.useIEnumerable) {
+            typeMapping.put("array", "IEnumerable");
+            typeMapping.put("list", "IEnumerable");
         }
     }
 }
